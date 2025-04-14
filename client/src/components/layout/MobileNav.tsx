@@ -31,51 +31,58 @@ export default function MobileNav({ closeMobileMenu }: MobileNavProps = {}) {
       <>
         <Link 
           href="/"
-          className={`block px-3 py-2 rounded-md ${isActive("/") ? "bg-primary bg-opacity-10 text-primary dark:text-primary" : "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"}`}
+          className={`flex items-center px-4 py-2 ${isActive("/") ? "bg-primary text-white" : "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"}`}
           onClick={handleNavClick}
         >
+          <i className="fas fa-chart-line mr-3"></i>
           Dashboard
         </Link>
         <Link 
           href="/predictions"
-          className={`block px-3 py-2 rounded-md ${isActive("/predictions") ? "bg-primary bg-opacity-10 text-primary dark:text-primary" : "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"}`}
+          className={`flex items-center px-4 py-2 ${isActive("/predictions") ? "bg-primary text-white" : "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"}`}
           onClick={handleNavClick}
         >
+          <i className="fas fa-robot mr-3"></i>
           AI Predictions
         </Link>
         <Link 
           href="/portfolio"
-          className={`block px-3 py-2 rounded-md ${isActive("/portfolio") ? "bg-primary bg-opacity-10 text-primary dark:text-primary" : "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"}`}
+          className={`flex items-center px-4 py-2 ${isActive("/portfolio") ? "bg-primary text-white" : "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"}`}
           onClick={handleNavClick}
         >
+          <i className="fas fa-wallet mr-3"></i>
           Portfolio
         </Link>
         <Link 
           href="/community"
-          className={`block px-3 py-2 rounded-md ${isActive("/community") ? "bg-primary bg-opacity-10 text-primary dark:text-primary" : "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"}`}
+          className={`flex items-center px-4 py-2 ${isActive("/community") ? "bg-primary text-white" : "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"}`}
           onClick={handleNavClick}
         >
+          <i className="fas fa-users mr-3"></i>
           Community
         </Link>
         <Link 
           href="/learn"
-          className={`block px-3 py-2 rounded-md ${isActive("/learn") ? "bg-primary bg-opacity-10 text-primary dark:text-primary" : "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"}`}
+          className={`flex items-center px-4 py-2 ${isActive("/learn") ? "bg-primary text-white" : "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"}`}
           onClick={handleNavClick}
         >
+          <i className="fas fa-graduation-cap mr-3"></i>
           Learn
         </Link>
         <Link 
           href="/alerts"
-          className={`block px-3 py-2 rounded-md ${isActive("/alerts") ? "bg-primary bg-opacity-10 text-primary dark:text-primary" : "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"}`}
+          className={`flex items-center px-4 py-2 ${isActive("/alerts") ? "bg-primary text-white" : "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"}`}
           onClick={handleNavClick}
         >
+          <i className="fas fa-bell mr-3"></i>
           Alerts
         </Link>
         <Link 
           href="/settings"
-          className={`block px-3 py-2 rounded-md ${isActive("/settings") ? "bg-primary bg-opacity-10 text-primary dark:text-primary" : "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"}`}
+          className={`flex items-center px-4 py-2 ${isActive("/settings") ? "bg-primary text-white" : "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"}`}
           onClick={handleNavClick}
         >
+          <i className="fas fa-cog mr-3"></i>
           Settings
         </Link>
       </>

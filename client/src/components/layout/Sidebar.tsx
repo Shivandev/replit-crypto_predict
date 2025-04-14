@@ -18,35 +18,34 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="flex-col w-64 h-screen flex-shrink-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 fixed md:relative z-10">
+    <aside className="w-60 h-screen bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 fixed md:relative">
       {/* Logo */}
       <div className="flex items-center justify-center h-16 border-b border-gray-200 dark:border-gray-700">
-        <div className="text-xl font-bold text-primary dark:text-primary">
+        <div className="text-lg font-bold text-primary dark:text-primary">
           <i className="fas fa-brain mr-2"></i>Cryptedict
         </div>
       </div>
       
       {/* Nav Items */}
-      <nav className="flex-1 px-2 py-3 space-y-1 overflow-y-auto h-full"
-           style={{ overflowX: 'hidden' }}>
+      <nav className="py-4">
         {navItems.map(item => (
           <Link 
             key={item.path} 
             href={item.path}
-            className={`flex items-center px-4 py-3 rounded-md ${
+            className={`flex items-center px-4 py-2 ${
               isActive(item.path)
-                ? "bg-primary bg-opacity-10 text-primary dark:text-primary"
+                ? "bg-primary text-white"
                 : "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
             }`}
           >
-            <i className={`${item.icon} w-6 flex-shrink-0`}></i>
-            <span className="ml-3 text-sm font-medium">{item.label}</span>
+            <i className={`${item.icon} mr-3`}></i>
+            {item.label}
           </Link>
         ))}
       </nav>
       
       {/* User Profile Section */}
-      <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+      <div className="absolute bottom-0 w-full p-4 border-t border-gray-200 dark:border-gray-700">
         <div className="flex items-center">
           <img 
             className="h-8 w-8 rounded-full" 
