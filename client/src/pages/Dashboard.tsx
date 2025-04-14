@@ -7,7 +7,7 @@ import CommunityInsights from "@/components/dashboard/CommunityInsights";
 export default function Dashboard() {
   // Update the page title
   useEffect(() => {
-    document.title = "Dashboard | CryptoMind";
+    document.title = "Dashboard | Cryptedict";
   }, []);
   
   return (

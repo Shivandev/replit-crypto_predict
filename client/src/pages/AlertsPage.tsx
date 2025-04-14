@@ -3,7 +3,7 @@ import { useEffect } from "react";
 export default function AlertsPage() {
   // Update the page title
   useEffect(() => {
-    document.title = "Alerts | CryptoMind";
+    document.title = "Alerts | Cryptedict";
   }, []);
   
   return (
