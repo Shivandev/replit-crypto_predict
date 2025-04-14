@@ -40,7 +40,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
         <Sidebar />
       </div>
       
-      <div className="flex flex-col flex-1 md:ml-60">
+      <div className="flex flex-col flex-1">
         {/* Mobile Header */}
         <header className="md:hidden bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
           <div className="flex items-center justify-between h-16 px-4">
