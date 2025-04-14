@@ -114,11 +114,9 @@ export default function AIPredictions() {
       </div>
       
       <div className="mt-6 text-center">
-        <Link href="/predictions">
-          <a className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg shadow-sm flex items-center mx-auto">
-            <i className="fas fa-robot mr-2"></i>
-            View All AI Predictions
-          </a>
+        <Link href="/predictions" className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg shadow-sm inline-flex items-center">
+          <i className="fas fa-robot mr-2"></i>
+          View All AI Predictions
         </Link>
       </div>
     </section>

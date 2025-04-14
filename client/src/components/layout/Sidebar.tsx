@@ -18,16 +18,17 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="hidden md:flex flex-col w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
+    <aside className="hidden md:flex flex-col w-60 flex-shrink-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
       {/* Logo */}
       <div className="flex items-center justify-center h-16 border-b border-gray-200 dark:border-gray-700">
         <div className="text-xl font-bold text-primary dark:text-primary">
-          <i className="fas fa-brain mr-2"></i>CryptoMind
+          <i className="fas fa-brain mr-2"></i>Cryptedict
         </div>
       </div>
       
       {/* Nav Items */}
-      <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
+      <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto"
+           style={{ overflowX: 'hidden' }}>
         {navItems.map(item => (
           <Link 
             key={item.path} 
@@ -38,8 +39,8 @@ export default function Sidebar() {
                 : "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
             }`}
           >
-            <i className={`${item.icon} w-6`}></i>
-            <span>{item.label}</span>
+            <i className={`${item.icon} w-6 flex-shrink-0`}></i>
+            <span className="ml-2 truncate">{item.label}</span>
           </Link>
         ))}
       </nav>
