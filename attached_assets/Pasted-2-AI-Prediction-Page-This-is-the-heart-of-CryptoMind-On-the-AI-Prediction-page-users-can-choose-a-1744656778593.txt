@@ -1,0 +1,24 @@
+2. AI Prediction Page
+This is the heart of CryptoMind. On the AI Prediction page, users can choose any major cryptocurrency (like BTC, ETH, or SOL) and specify a prediction timeframe — from a few hours to several months. The page shows the predicted future price, accuracy score, and visualizes the forecast with a chart. It's powered by machine learning models trained on real historical data. The interface is interactive, and explanations help users understand how and why the model made each prediction.
+
+💼 3. Portfolio Page
+The Portfolio page lets users manually or automatically track their crypto investments. They can add assets by inputting the amount, buy price, and date of purchase. The system calculates gains/losses and displays a real-time summary of their investments, including charts showing allocation and profit percentages. This page helps users make smarter financial decisions by visualizing where their money is and how it's performing.
+
+💬 4. Community Page
+The Community page fosters discussion, support, and sharing of ideas. Users can create posts about their predictions, opinions on market trends, or questions for the community. Each post supports comments, likes, tags, and user profiles. It’s a social hub — blending forums with crypto — where investors of all levels interact and learn from each other.
+
+🛠️ 5. Settings Page
+This page allows users to customize their experience. They can manage their account details (name, email, password), toggle dark/light mode, set privacy options, and configure alerts. It also lets them view activity logs, adjust portfolio visibility, and reset predictions or preferences. It’s all about giving the user control over their app experience.
+
+🎓 6. Learn (Crypto Studio) Page
+The Learn or Crypto Studio page is designed for beginners and curious learners. It features tutorials, articles, and videos explaining everything from "What is Bitcoin?" to "How to Create a Diversified Portfolio." Lessons are organized by level — Beginner, Intermediate, and Advanced — and tagged by topic. Users can search, bookmark, or track completed content. This transforms CryptoMind from just a prediction tool into a full-blown crypto education platform.
+
+🔔 7. Alerts Page
+The Alerts page allows users to set up custom price alerts and prediction-based triggers. For example, they can choose to be notified when Bitcoin drops below $50,000 or when the AI model predicts a strong uptrend. Users can select notification methods (email, SMS, or in-app), manage existing alerts, and view alert history. This feature is especially helpful for active investors who want to respond quickly to market changes without watching prices 24/7.
+
+🧱 Bonus Pages (Optional for Future Expansion)
+🌍 8. Explore Page
+A place where users can browse market-wide stats, search for trending coins, compare coin performances, or explore other users’ public portfolios.
+
+🧑‍💼 9. User Profile Page
+Shows a user's crypto journey — posts, comments, portfolio, points earned, alerts set, and predictions viewed. Useful for social credibility.

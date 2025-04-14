@@ -3,7 +3,7 @@ import { useEffect } from "react";
 export default function CommunityPage() {
   // Update the page title
   useEffect(() => {
-    document.title = "Community | CryptoMind";
+    document.title = "Community | Cryptedict";
   }, []);
   
   return (

@@ -3,7 +3,7 @@ import { useEffect } from "react";
 export default function SettingsPage() {
   // Update the page title
   useEffect(() => {
-    document.title = "Settings | CryptoMind";
+    document.title = "Settings | Cryptedict";
   }, []);
   
   return (
