@@ -18,7 +18,7 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="hidden md:flex flex-col w-60 flex-shrink-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
+    <aside className="flex-col w-60 h-screen flex-shrink-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 fixed md:relative">
       {/* Logo */}
       <div className="flex items-center justify-center h-16 border-b border-gray-200 dark:border-gray-700">
         <div className="text-xl font-bold text-primary dark:text-primary">
@@ -27,7 +27,7 @@ export default function Sidebar() {
       </div>
       
       {/* Nav Items */}
-      <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto"
+      <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto h-full"
            style={{ overflowX: 'hidden' }}>
         {navItems.map(item => (
           <Link 

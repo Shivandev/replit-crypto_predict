@@ -1,0 +1,70 @@
+Thanks for sharing that snippet! You're using **two `<aside>` tags back to back**, both with their own sizing (`w-64` and `w-60`). That could be one of the reasons your layout is getting thrown off and covering text when switching between pages.
+
+Let’s clean this up and fix the **padding/spacing issue** so sidebar navigation works better and page content is readable.
+
+---
+
+## ✅ Problem Summary
+
+You're currently facing:
+- **Text/content getting covered** when switching pages via the sidebar.
+- Likely caused by **overlapping layouts**, **excessive padding**, or **nested sidebars**.
+- And you have **two aside blocks**, which might be duplicating styles unintentionally.
+
+---
+
+## 🔧 Suggested Fix (Clean Version)
+
+Here’s a cleaner and corrected version of your sidebar layout:
+
+```jsx
+return (
+  <aside className="hidden md:flex flex-col w-60 flex-shrink-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
+    {/* Logo */}
+    <div className="flex items-center justify-center h-16 border-b border-gray-200 dark:border-gray-700">
+      <div className="text-xl font-bold text-primary dark:text-primary">
+        <i className="fas fa-brain mr-2"></i>CryptoMind
+      </div>
+    </div>
+
+    {/* Nav Items */}
+    <nav className="flex flex-col p-4 gap-2 overflow-y-auto">
+      {/* Example Item */}
+      <a href="/dashboard" className="text-gray-700 dark:text-gray-200 hover:text-blue-600">
+        Dashboard
+      </a>
+      {/* Add more links below */}
+    </nav>
+  </aside>
+);
+```
+
+---
+
+## ✅ Key Fixes Applied
+
+- ✅ **Removed duplicate `<aside>`** to avoid nesting/overlapping
+- ✅ **Set consistent `w-60` width**
+- ✅ **Added `p-4` padding to the nav** so words are not squished
+- ✅ **Used `overflow-y-auto`** so it scrolls cleanly if content grows
+
+---
+
+## 💡 Bonus Tip
+
+Make sure the **main content** area beside the sidebar isn’t hidden behind it:
+
+```jsx
+<div className="flex">
+  <Sidebar />
+  <main className="flex-1 p-6 overflow-auto">
+    {/* Page content here */}
+  </main>
+</div>
+```
+
+This keeps the layout **responsive**, readable, and avoids overlaps.
+
+---
+
+Let me know if you’d like help generating a full layout (sidebar + main content with routing) or if you want me to help tweak specific pages like “Prediction” or “Portfolio.”
