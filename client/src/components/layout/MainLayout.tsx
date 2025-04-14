@@ -75,8 +75,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
       <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 dark:bg-gray-900">
         {/* Page Header with Search and Dark Mode Toggle */}
         <div className="bg-white dark:bg-gray-800 shadow">
-          <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-            <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Dashboard</h1>
+          <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+            <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Cryptedict</h1>
             <div className="hidden md:flex items-center space-x-4">
               <div className="relative">
                 <input 
@@ -104,7 +104,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
         </div>
         
         {/* Page Content */}
-        {children}
+        <div className="pb-16 md:pb-0">
+          {children}
+        </div>
       </main>
       
       {/* Mobile Bottom Navigation */}
