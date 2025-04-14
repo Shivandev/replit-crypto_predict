@@ -19,11 +19,9 @@ export default function CommunityInsights() {
     <section className="mb-8">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold">Community Insights</h2>
-        <Link href="/community">
-          <a className="text-primary dark:text-primary text-sm font-medium flex items-center">
+        <Link href="/community" className="text-primary dark:text-primary text-sm font-medium flex items-center">
             View All
             <i className="fas fa-chevron-right ml-1 text-xs"></i>
-          </a>
         </Link>
       </div>
       
