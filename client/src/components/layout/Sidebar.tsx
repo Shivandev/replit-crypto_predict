@@ -18,7 +18,7 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="flex-col w-60 h-screen flex-shrink-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 fixed md:relative">
+    <aside className="flex-col w-64 h-screen flex-shrink-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 fixed md:relative z-10">
       {/* Logo */}
       <div className="flex items-center justify-center h-16 border-b border-gray-200 dark:border-gray-700">
         <div className="text-xl font-bold text-primary dark:text-primary">
