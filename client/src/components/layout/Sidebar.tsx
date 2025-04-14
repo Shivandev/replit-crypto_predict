@@ -27,20 +27,20 @@ export default function Sidebar() {
       </div>
       
       {/* Nav Items */}
-      <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto h-full"
+      <nav className="flex-1 px-2 py-3 space-y-1 overflow-y-auto h-full"
            style={{ overflowX: 'hidden' }}>
         {navItems.map(item => (
           <Link 
             key={item.path} 
             href={item.path}
-            className={`flex items-center px-2 py-2 rounded-md ${
+            className={`flex items-center px-4 py-3 rounded-md ${
               isActive(item.path)
                 ? "bg-primary bg-opacity-10 text-primary dark:text-primary"
                 : "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
             }`}
           >
             <i className={`${item.icon} w-6 flex-shrink-0`}></i>
-            <span className="ml-2 truncate">{item.label}</span>
+            <span className="ml-3 text-sm font-medium">{item.label}</span>
           </Link>
         ))}
       </nav>
