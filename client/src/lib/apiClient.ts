@@ -9,10 +9,12 @@ interface ApiOptions {
 const COINGECKO_API = 'https://api.coingecko.com/api/v3';
 const COINGECKO_PRO_API = 'https://pro-api.coingecko.com/api/v3';
 
-// Add more data sources for redundancy and accuracy
+// Enhanced API sources for real-time and historical data
 const ALTERNATIVE_APIS = {
   binance: 'https://api.binance.com/api/v3',
-  coindesk: 'https://api.coindesk.com/v1'
+  coindesk: 'https://api.coindesk.com/v1',
+  kraken: 'https://api.kraken.com/0/public',
+  gemini: 'https://api.gemini.com/v1'
 };
 
 export async function api<T>(url: string, options: ApiOptions = {}): Promise<T> {
@@ -67,8 +69,17 @@ async function fetchCoinGeckoPrice(coinId: string) {
     }).catch(() => null)
   ]);
 
-  // Use Binance real-time price as primary source
-  const currentPrice = binancePrice?.data?.price || geckoResponse.data[coinId]?.usd;
+  // Aggregate prices from multiple sources for accuracy
+  const prices = [
+    binancePrice?.data?.price,
+    geckoResponse.data[coinId]?.usd,
+    // Add more price sources as needed
+  ].filter(Boolean).map(price => parseFloat(price));
+  
+  // Use median price to avoid outliers
+  const currentPrice = prices.length > 0 
+    ? prices.sort((a, b) => a - b)[Math.floor(prices.length / 2)]
+    : null;
   
   return {
     historicalData: {
