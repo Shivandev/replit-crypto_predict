@@ -1,4 +1,3 @@
-
 import axios from 'axios';
 import { apiRequest } from "./queryClient";
 
@@ -24,7 +23,7 @@ async function fetchCoinGeckoPrice(coinId: string) {
       interval: 'daily'
     }
   });
-  
+
   // Get current price data
   const currentData = await axios.get(`${COINGECKO_API}/simple/price`, {
     params: {
@@ -35,7 +34,7 @@ async function fetchCoinGeckoPrice(coinId: string) {
       include_market_cap: true
     }
   });
-  
+
   return {
     historicalData: response.data,
     currentData: currentData.data
@@ -47,30 +46,28 @@ export async function fetchCryptocurrencies() {
   const btcData = await fetchCoinGeckoPrice('bitcoin');
   const ethData = await fetchCoinGeckoPrice('ethereum');
   const solData = await fetchCoinGeckoPrice('solana');
-  
-  return [
-    {
-      id: 1,
-      symbol: 'BTC',
-      name: 'Bitcoin',
-      currentPrice: btcData.bitcoin.usd,
-      priceChangePercentage24h: btcData.bitcoin.usd_24h_change
-    },
-    {
-      id: 2,
-      symbol: 'ETH',
-      name: 'Ethereum',
-      currentPrice: ethData.ethereum.usd,
-      priceChangePercentage24h: ethData.ethereum.usd_24h_change
-    },
-    {
-      id: 3,
-      symbol: 'SOL',
-      name: 'Solana',
-      currentPrice: solData.solana.usd,
-      priceChangePercentage24h: solData.solana.usd_24h_change
-    }
-  ];
+
+  return [{
+    id: 1,
+    symbol: 'BTC',
+    name: 'Bitcoin',
+    currentPrice: btcData.currentData.bitcoin.usd,
+    priceChangePercentage24h: btcData.currentData.bitcoin.usd_24h_change
+  },
+  {
+    id: 2,
+    symbol: 'ETH',
+    name: 'Ethereum',
+    currentPrice: ethData.currentData.ethereum.usd,
+    priceChangePercentage24h: ethData.currentData.ethereum.usd_24h_change
+  },
+  {
+    id: 3,
+    symbol: 'SOL',
+    name: 'Solana',
+    currentPrice: solData.currentData.solana.usd,
+    priceChangePercentage24h: solData.currentData.solana.usd_24h_change
+  }];
 }
 
 export async function fetchCryptocurrency(id: number) {
@@ -82,15 +79,15 @@ export async function fetchCryptocurrency(id: number) {
 export async function fetchPredictions(cryptocurrencyId: number) {
   const crypto = await fetchCryptocurrency(cryptocurrencyId);
   if (!crypto) return [];
-  
+
   // Advanced ML-based prediction using historical data and technical indicators
   const timeframes = ['24h', '7d', '30d', '90d', '1y'];
-  
+
   // Calculate technical indicators
   const calculateSMA = (prices: number[], period: number) => {
     return prices.slice(-period).reduce((a, b) => a + b, 0) / period;
   };
-  
+
   const calculateRSI = (prices: number[]) => {
     const gains = [];
     const losses = [];
@@ -109,36 +106,36 @@ export async function fetchPredictions(cryptocurrencyId: number) {
     const rs = avgGain / avgLoss;
     return 100 - (100 / (1 + rs));
   };
-  
+
   return Promise.all(timeframes.map(async timeframe => {
-    const days = timeframe === '24h' ? 1 : 
+    const days = timeframe === '24h' ? 1 :
                  timeframe === '7d' ? 7 :
                  timeframe === '30d' ? 30 :
                  timeframe === '90d' ? 90 : 365;
-    
+
     // Get historical data for analysis
-    const priceData = await fetchCoinGeckoPrice(crypto.id === 1 ? 'bitcoin' : 
+    const priceData = await fetchCoinGeckoPrice(crypto.id === 1 ? 'bitcoin' :
                                               crypto.id === 2 ? 'ethereum' : 'solana');
-    
+
     const prices = priceData.historicalData.prices.map(p => p[1]);
     const sma20 = calculateSMA(prices, 20);
     const rsi = calculateRSI(prices);
-    
+
     // ML-based prediction factors
     const momentum = prices[prices.length - 1] / sma20;
     const trendStrength = (rsi - 50) / 50;
     const volatility = Math.sqrt(prices.slice(-30).reduce((acc, val) => acc + Math.pow(val - sma20, 2), 0) / 30) / sma20;
-    
+
     // Combined prediction using weighted factors
     const predictedChange = (
-      (momentum * 0.4) + 
-      (trendStrength * 0.3) + 
+      (momentum * 0.4) +
+      (trendStrength * 0.3) +
       (volatility * 0.3)
     ) * Math.sqrt(days);
-    
+
     const predictedPrice = crypto.currentPrice * (1 + predictedChange);
     const confidence = 95 + (Math.random() * 4); // High confidence based on real data
-    
+
     return {
       id: cryptocurrencyId,
       cryptocurrencyId: cryptocurrencyId,
@@ -149,7 +146,7 @@ export async function fetchPredictions(cryptocurrencyId: number) {
       createdAt: new Date(),
       updatedAt: new Date()
     };
-  });
+  }));
 }
 
 // Keep existing functions
