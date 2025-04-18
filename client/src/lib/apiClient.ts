@@ -22,22 +22,32 @@ export async function api<T>(url: string, options: ApiOptions = {}): Promise<T> 
 }
 
 async function fetchCoinGeckoPrice(coinId: string) {
-  // Fetch real-time and historical data from multiple sources
+  // Fetch real-time price from Binance first (most up-to-date source)
+  const binancePrice = await axios.get(`${ALTERNATIVE_APIS.binance}/ticker/price`, {
+    params: { 
+      symbol: `${coinId.toUpperCase()}USDT`
+    }
+  }).catch(() => null);
+
+  // Fetch CoinGecko data as backup and for additional info
   const [geckoResponse, binanceResponse] = await Promise.all([
-    axios.get(`${COINGECKO_API}/coins/${coinId}/market_chart`, {
+    axios.get(`${COINGECKO_API}/simple/price`, {
       params: {
-        vs_currency: 'usd',
-        days: '90', // Extended historical data
-        interval: 'hourly' // Higher granularity
+        ids: coinId,
+        vs_currencies: 'usd',
+        include_24hr_change: true,
+        include_24hr_vol: true,
+        include_market_cap: true,
+        include_last_updated_at: true
       }
     }),
     axios.get(`${ALTERNATIVE_APIS.binance}/klines`, {
       params: {
         symbol: `${coinId.toUpperCase()}USDT`,
-        interval: '1h',
-        limit: 2160 // 90 days of hourly data
+        interval: '1m', // 1-minute intervals for more recent data
+        limit: 60 // Last hour of data
       }
-    }).catch(() => null) // Fallback if Binance fails
+    }).catch(() => null)
   ]);
 
   // Get current price data from multiple sources
@@ -57,17 +67,20 @@ async function fetchCoinGeckoPrice(coinId: string) {
     }).catch(() => null)
   ]);
 
-  // Combine and validate data from multiple sources
-  const currentPrice = binanceTickerData?.data?.price || geckoCurrentData.data[coinId].usd;
+  // Use Binance real-time price as primary source
+  const currentPrice = binancePrice?.data?.price || geckoResponse.data[coinId]?.usd;
   
   return {
     historicalData: {
-      ...geckoResponse.data,
-      binanceData: binanceResponse?.data || []
+      prices: binanceResponse?.data || [],
+      lastUpdated: new Date().toISOString()
     },
     currentData: {
-      ...geckoCurrentData.data,
-      binancePrice: currentPrice
+      [coinId]: {
+        usd: parseFloat(currentPrice),
+        usd_24h_change: geckoResponse.data[coinId]?.usd_24h_change || 0,
+        last_updated_at: Math.floor(Date.now() / 1000)
+      }
     }
   };
 }
