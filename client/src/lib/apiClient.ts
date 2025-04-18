@@ -127,7 +127,7 @@ export async function fetchPredictions(cryptocurrencyId: number) {
     // ML-based prediction factors
     const momentum = prices[prices.length - 1] / sma20;
     const trendStrength = (rsi - 50) / 50;
-    const volatility = Math.std(prices.slice(-30)) / sma20;
+    const volatility = Math.sqrt(prices.slice(-30).reduce((acc, val) => acc + Math.pow(val - sma20, 2), 0) / 30) / sma20;
     
     // Combined prediction using weighted factors
     const predictedChange = (
