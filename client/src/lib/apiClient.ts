@@ -70,11 +70,26 @@ async function fetchCoinGeckoPrice(coinId: string) {
   ]);
 
   // Aggregate prices from multiple sources for accuracy
-  const prices = [
-    binancePrice?.data?.price,
-    geckoResponse.data[coinId]?.usd,
-    // Add more price sources as needed
-  ].filter(Boolean).map(price => parseFloat(price));
+  const binanceCurrentPrice = parseFloat(binancePrice?.data?.price);
+  const geckoCurrentPrice = geckoResponse.data[coinId]?.usd;
+  
+  // Prioritize Binance price as it's more real-time
+  const currentPrice = binanceCurrentPrice || geckoCurrentPrice;
+  
+  // Return the most recent price
+  return {
+    historicalData: {
+      prices: binanceResponse?.data || [],
+      lastUpdated: new Date().toISOString()
+    },
+    currentData: {
+      [coinId]: {
+        usd: currentPrice,
+        usd_24h_change: geckoResponse.data[coinId]?.usd_24h_change || 0,
+        last_updated_at: Math.floor(Date.now() / 1000)
+      }
+    }
+  };
   
   // Use median price to avoid outliers
   const currentPrice = prices.length > 0 

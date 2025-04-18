@@ -8,7 +8,7 @@ interface PriceChartProps {
 }
 
 // Generate mock historical data for the chart
-function generateMockPriceData(base: number = 43758.24, timeframe: string, volatility: number = 0.02) {
+function generateMockPriceData(base: number, timeframe: string, volatility: number = 0.02) {
   let dataPoints: number;
   let initialDate: Date = new Date();
   

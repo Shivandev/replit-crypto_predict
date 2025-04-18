@@ -23,6 +23,7 @@ export default function MarketOverview() {
   // Fetch cryptocurrencies
   const { data: cryptocurrencies, isLoading: isLoadingCryptos } = useQuery<Cryptocurrency[]>({
     queryKey: ["/api/cryptocurrencies"],
+    refetchInterval: 30000, // Refetch every 30 seconds
   });
   
   // Get the selected cryptocurrency
