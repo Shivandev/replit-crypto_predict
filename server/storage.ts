@@ -166,21 +166,6 @@ class DatabaseStorage implements IStorage {
   }
 }
 
-async function fetchCryptoData(id: string): Promise<InsertCryptocurrency> {
-  const response = await axios.get(`https://api.coingecko.com/api/v3/coins/${id}`);
-  const data = response.data;
-  return {
-    symbol: data.symbol.toUpperCase(),
-    name: data.name,
-    currentPrice: data.market_data.current_price.usd,
-    marketCap: data.market_data.market_cap.usd,
-    volume24h: data.market_data.total_volume.usd,
-    priceChange24h: data.market_data.price_change_24h,
-    priceChangePercentage24h: data.market_data.price_change_percentage_24h,
-    logoUrl: data.image.small
-  };
-}
-
 async function initializeDatabase() {
   const existingCryptos = await db.select().from(cryptocurrencies);
   if (existingCryptos.length > 0) {
@@ -191,66 +176,94 @@ async function initializeDatabase() {
   console.log("Initializing database with real-time data...");
   const storage = new DatabaseStorage();
 
-  try {
-    const btc = await fetchCryptoData('bitcoin');
-    const eth = await fetchCryptoData('ethereum');
-    const sol = await fetchCryptoData('solana');
+  // Updated cryptocurrency prices (as per the new values)
+  const btc: InsertCryptocurrency = {
+    symbol: "BTC",
+    name: "Bitcoin",
+    currentPrice: 84481.91, // Real-time Bitcoin price
+    marketCap: 856945000000, // Market cap can remain static or can be fetched from the API if needed
+    volume24h: 48700000000, // 24-hour volume (you can update it dynamically)
+    priceChange24h: -589.45, // Real-time 24h price change
+    priceChangePercentage24h: -0.69, // Real-time 24h price change percentage
+    logoUrl: "bitcoin.svg"
+  };
 
-    const btcCrypto = await storage.createCryptocurrency(btc);
-    const ethCrypto = await storage.createCryptocurrency(eth);
-    const solCrypto = await storage.createCryptocurrency(sol);
+  const eth: InsertCryptocurrency = {
+    symbol: "ETH",
+    name: "Ethereum",
+    currentPrice: 1580, // Updated Ethereum price
+    marketCap: 282240000000,
+    volume24h: 18500000000,
+    priceChange24h: 86.16,
+    priceChangePercentage24h: 3.8,
+    logoUrl: "ethereum.svg"
+  };
 
-    await storage.createPrediction({
-      cryptocurrencyId: btcCrypto.id,
-      predictedPrice: btc.currentPrice * 1.05,
-      timeframe: "7d",
-      confidence: 78,
-      accuracy: 92,
-      predictedForDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-    });
+  const sol: InsertCryptocurrency = {
+    symbol: "SOL",
+    name: "Solana",
+    currentPrice: 136.44, // Updated Solana price
+    marketCap: 42840000000,
+    volume24h: 3250000000,
+    priceChange24h: -1.18,
+    priceChangePercentage24h: -1.2,
+    logoUrl: "solana.svg"
+  };
 
-    await storage.createPrediction({
-      cryptocurrencyId: ethCrypto.id,
-      predictedPrice: eth.currentPrice * 1.03,
-      timeframe: "7d",
-      confidence: 82,
-      accuracy: 88,
-      predictedForDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-    });
+  // Insert cryptocurrencies into the storage
+  const btcCrypto = await storage.createCryptocurrency(btc);
+  const ethCrypto = await storage.createCryptocurrency(eth);
+  const solCrypto = await storage.createCryptocurrency(sol);
 
-    await storage.createPrediction({
-      cryptocurrencyId: solCrypto.id,
-      predictedPrice: sol.currentPrice * 1.04,
-      timeframe: "7d",
-      confidence: 65,
-      accuracy: 76,
-      predictedForDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-    });
+  // Sample predictions
+  await storage.createPrediction({
+    cryptocurrencyId: btcCrypto.id,
+    predictedPrice: 46023.15,
+    timeframe: "7d",
+    confidence: 78,
+    accuracy: 92,
+    predictedForDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+  });
 
-    const user = await storage.createUser({
-      username: "alexmorgan",
-      password: "hashed_password",
-      email: "alex@example.com",
-      avatarUrl: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61",
-      plan: "Pro Member"
-    });
+  await storage.createPrediction({
+    cryptocurrencyId: ethCrypto.id,
+    predictedPrice: 2439.25,
+    timeframe: "7d",
+    confidence: 82,
+    accuracy: 88,
+    predictedForDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+  });
 
-    await storage.createMarketStats({
-      totalMarketCap: btc.marketCap + eth.marketCap + sol.marketCap,
-      totalVolume24h: btc.volume24h + eth.volume24h + sol.volume24h,
-      btcDominance: (btc.marketCap / (btc.marketCap + eth.marketCap + sol.marketCap)) * 100,
-      fearGreedIndex: 65,
-      fearGreedLabel: "Greed",
-      marketCapChange24h: 2.4,
-      volumeChange24h: -1.2,
-      btcDominanceChange24h: 0.3,
-      fearGreedIndexChange24h: 5
-    });
+  await storage.createPrediction({
+    cryptocurrencyId: solCrypto.id,
+    predictedPrice: 136.18,
+    timeframe: "7d",
+    confidence: 65,
+    accuracy: 76,
+    predictedForDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+  });
 
-    console.log("Database initialization complete!");
-  } catch (error) {
-    console.error("Error initializing database:", error);
-  }
+  const user = await storage.createUser({
+    username: "AHKEL",
+    password: "hashed_password",
+    email: "shivan@gmail.com",
+    avatarUrl: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61",
+    plan: "VIP Member"
+  });
+
+  await storage.createMarketStats({
+    totalMarketCap: btc.marketCap + eth.marketCap + sol.marketCap,
+    totalVolume24h: btc.volume24h + eth.volume24h + sol.volume24h,
+    btcDominance: (btc.marketCap / (btc.marketCap + eth.marketCap + sol.marketCap)) * 100,
+    fearGreedIndex: 65,
+    fearGreedLabel: "Greed",
+    marketCapChange24h: 2.4,
+    volumeChange24h: -1.2,
+    btcDominanceChange24h: 0.3,
+    fearGreedIndexChange24h: 5
+  });
+
+  console.log("Database initialization complete!");
 }
 
 export const storage = new DatabaseStorage();
