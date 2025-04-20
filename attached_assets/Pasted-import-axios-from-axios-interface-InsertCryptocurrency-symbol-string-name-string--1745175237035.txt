@@ -1,0 +1,177 @@
+import axios from 'axios';
+
+interface InsertCryptocurrency {
+  symbol: string;
+  name: string;
+  currentPrice: number;
+  marketCap: number;
+  volume24h: number;
+  priceChange24h: number;
+  priceChangePercentage24h: number;
+  logoUrl: string;
+}
+
+async function fetchCryptoData(id: string): Promise<InsertCryptocurrency> {
+  const response = await axios.get(`https://api.coingecko.com/api/v3/coins/${id}`);
+  const data = response.data;
+  return {
+    symbol: data.symbol.toUpperCase(),
+    name: data.name,
+    currentPrice: data.market_data.current_price.usd,
+    marketCap: data.market_data.market_cap.usd,
+    volume24h: data.market_data.total_volume.usd,
+    priceChange24h: data.market_data.price_change_24h,
+    priceChangePercentage24h: data.market_data.price_change_percentage_24h,
+    logoUrl: data.image.small
+  };
+}
+
+async function initializeCryptocurrencies() {
+  // Fetch real-time data
+  const btc = await fetchCryptoData('bitcoin');
+  const eth = await fetchCryptoData('ethereum');
+  const sol = await fetchCryptoData('solana');
+
+  // Save fetched data to your database (storage.createCryptocurrency)
+  const btcCrypto = await storage.createCryptocurrency(btc);
+  const ethCrypto = await storage.createCryptocurrency(eth);
+  const solCrypto = await storage.createCryptocurrency(sol);
+
+  // Sample predictions (you can adjust prediction logic as needed)
+  await storage.createPrediction({
+    cryptocurrencyId: btcCrypto.id,
+    predictedPrice: 46023.15, // You may want to update this with more dynamic prediction logic
+    timeframe: "7d",
+    confidence: 78,
+    accuracy: 92,
+    predictedForDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+  });
+
+  await storage.createPrediction({
+    cryptocurrencyId: ethCrypto.id,
+    predictedPrice: 2439.25,
+    timeframe: "7d",
+    confidence: 82,
+    accuracy: 88,
+    predictedForDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+  });
+
+  await storage.createPrediction({
+    cryptocurrencyId: solCrypto.id,
+    predictedPrice: 96.18,
+    timeframe: "7d",
+    confidence: 65,
+    accuracy: 76,
+    predictedForDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+  });
+
+  // Sample user
+  const user = await storage.createUser({
+    username: "alexmorgan",
+    password: "hashed_password", // In a real app, this would be hashed
+    email: "alex@example.com",
+    avatarUrl: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61",
+    plan: "Pro Member"
+  });
+
+  // Sample market stats (you can adjust these as needed)
+  await storage.createMarketStats({
+    totalMarketCap: 1240000000000,
+    totalVolume24h: 48700000000,
+    btcDominance: 42.8,
+    fearGreedIndex: 65,
+    fearGreedLabel: "Greed",
+    marketCapChange24h: 2.4,
+    volumeChange24h: -1.2,
+    btcDominanceChange24h: 0.3,
+    fearGreedIndexChange24h: 5
+  });
+
+  // Sample discussions (adjust the content as needed)
+  const discussion1 = await storage.createDiscussion({
+    userId: user.id,
+    title: "Bitcoin halving impact predictions",
+    content: "The upcoming Bitcoin halving is expected to reduce mining rewards by 50%. What are your predictions on price impact?",
+    tags: ["bitcoin", "halving", "price", "prediction"]
+  });
+
+  const discussion2 = await storage.createDiscussion({
+    userId: user.id,
+    title: "Ethereum's new upgrade implications",
+    content: "With the recent Ethereum update, what changes can we expect in gas fees and transaction speeds?",
+    tags: ["ethereum", "upgrade", "gas", "transaction"]
+  });
+
+  const discussion3 = await storage.createDiscussion({
+    userId: user.id,
+    title: "AI prediction accuracy discussion",
+    content: "Let's analyze how accurate the AI predictions have been over the last 3 months. I've compiled some data...",
+    tags: ["AI", "prediction", "accuracy", "analysis"]
+  });
+
+  // Update discussion properties using the database directly
+  await db.update(discussions)
+    .set({
+      upvotes: 126,
+      commentCount: 48,
+      isHot: true
+    })
+    .where(eq(discussions.id, discussion1.id));
+
+  await db.update(discussions)
+    .set({
+      upvotes: 87,
+      commentCount: 32,
+      isTrending: true
+    })
+    .where(eq(discussions.id, discussion2.id));
+
+  await db.update(discussions)
+    .set({
+      upvotes: 53,
+      commentCount: 24
+    })
+    .where(eq(discussions.id, discussion3.id));
+
+  // Sample educational resources
+  await storage.createResource({
+    title: "Crypto Basics: Understanding Blockchain",
+    description: "A beginner-friendly introduction to blockchain technology.",
+    type: "video",
+    duration: "12 min video",
+    url: "/learn/crypto-basics",
+    rating: 4.5,
+    ratingCount: 432,
+    iconType: "video",
+    level: "beginner"
+  });
+
+  await storage.createResource({
+    title: "Technical Analysis Fundamentals",
+    description: "Learn how to read charts and identify patterns for better trading decisions.",
+    type: "course",
+    duration: "5-part course",
+    url: "/learn/technical-analysis",
+    rating: 4.0,
+    ratingCount: 287,
+    iconType: "book",
+    level: "intermediate"
+  });
+
+  await storage.createResource({
+    title: "Crypto Tax Guide 2023",
+    description: "Everything you need to know about cryptocurrency taxation in the current year.",
+    type: "guide",
+    duration: "PDF Guide",
+    url: "/learn/crypto-tax-guide",
+    rating: 5.0,
+    ratingCount: 156,
+    iconType: "file-alt",
+    level: "intermediate"
+  });
+
+  console.log("Database initialization complete!");
+}
+
+// Initialize the data
+initializeCryptocurrencies();
