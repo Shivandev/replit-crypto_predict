@@ -296,17 +296,20 @@ async function initializeDatabase() {
   });
 
   // Sample market stats
-  await storage.createMarketStats({
-    totalMarketCap: 1240000000000,
-    totalVolume24h: 48700000000,
-    btcDominance: 42.8,
-    fearGreedIndex: 65,
-    fearGreedLabel: "Greed",
-    marketCapChange24h: 2.4,
-    volumeChange24h: -1.2,
-    btcDominanceChange24h: 0.3,
-    fearGreedIndexChange24h: 5
-  });
+  const marketStats = {
+    id: 1,
+    totalMarketCap: 2850000000000,
+    totalVolume24h: 98500000000,
+    btcDominance: 54.2,
+    btcDominanceChange24h: 1.2,
+    marketCapChange24h: 3.5,
+    volumeChange24h: 7.8,
+    fearGreedIndex: 72,
+    fearGreedLabel: "Extreme Greed",
+    fearGreedIndexChange24h: 7
+  };
+  await storage.createMarketStats(marketStats);
+
 
   // Sample discussions
   const discussion1 = await storage.createDiscussion({

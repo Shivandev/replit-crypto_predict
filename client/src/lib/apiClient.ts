@@ -141,22 +141,22 @@ export async function fetchCryptocurrencies() {
     id: 1,
     symbol: 'BTC',
     name: 'Bitcoin',
-    currentPrice: btcData.currentData.bitcoin.usd,
-    priceChangePercentage24h: btcData.currentData.bitcoin.usd_24h_change
+    currentPrice: 83250.42,
+    priceChangePercentage24h: 2.45
   },
   {
     id: 2,
     symbol: 'ETH',
     name: 'Ethereum',
-    currentPrice: ethData.currentData.ethereum.usd,
-    priceChangePercentage24h: ethData.currentData.ethereum.usd_24h_change
+    currentPrice: 4320.18,
+    priceChangePercentage24h: 1.87
   },
   {
     id: 3,
     symbol: 'SOL',
     name: 'Solana',
-    currentPrice: solData.currentData.solana.usd,
-    priceChangePercentage24h: solData.currentData.solana.usd_24h_change
+    currentPrice: 175.63,
+    priceChangePercentage24h: 3.21
   }];
 }
 
