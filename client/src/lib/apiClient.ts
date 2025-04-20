@@ -124,17 +124,20 @@ async function fetchCoinGeckoPrice(coinId: string) {
 
 // Cryptocurrency API with real-time data
 export async function fetchCryptocurrencies() {
-  const btcData = await fetchCoinGeckoPrice('bitcoin');
-  const ethData = await fetchCoinGeckoPrice('ethereum');
-  const solData = await fetchCoinGeckoPrice('solana');
+  // Force fresh data from API
+  const response = await api<any>('/api/cryptocurrencies', {
+    method: 'GET',
+    cacheBust: true
+  });
 
-  return [{
-    id: 1,
-    symbol: 'BTC',
-    name: 'Bitcoin',
-    currentPrice: 83250.42,
-    priceChangePercentage24h: 2.45
-  },
+  if (!response) {
+    return [{
+      id: 1,
+      symbol: 'BTC',
+      name: 'Bitcoin',
+      currentPrice: await fetchLatestPrice('bitcoin'),
+      priceChangePercentage24h: 0
+    },
   {
     id: 2,
     symbol: 'ETH',
