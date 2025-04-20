@@ -4,6 +4,7 @@ import { apiRequest } from "./queryClient";
 interface ApiOptions {
   method?: string;
   data?: unknown;
+  cacheBust?: boolean; // Added cache busting option
 }
 
 const COINGECKO_API = 'https://api.coingecko.com/api/v3';
@@ -21,8 +22,12 @@ const ALTERNATIVE_APIS = {
 };
 
 export async function api<T>(url: string, options: ApiOptions = {}): Promise<T> {
-  const { method = "GET", data } = options;
-  const res = await apiRequest(method, url, data);
+  const { method = "GET", data, cacheBust = true } = options;
+  let fullUrl = url;
+  if (cacheBust) {
+    fullUrl += (url.includes('?') ? '&' : '?') + `t=${Date.now()}`;
+  }
+  const res = await apiRequest(method, fullUrl, data);
   return res.json();
 }
 
@@ -52,11 +57,11 @@ async function fetchCoinGeckoPrice(coinId: string) {
     .filter(price => price !== null)
     .sort((a, b) => a - b);
 
-  const medianPrice = validPrices[Math.floor(validPrices.length / 2)] || null;
+  const medianPrice = filteredPrices[Math.floor(filteredPrices.length / 2)] || null;
 
   // Fetch CoinGecko data for additional info
   const [geckoResponse, binanceResponse] = await Promise.all([
-    axios.get(`${COINGECKO_API}/simple/price`, {
+    api(`${COINGECKO_API}/simple/price`, {
       params: {
         ids: coinId,
         vs_currencies: 'usd',
@@ -77,7 +82,7 @@ async function fetchCoinGeckoPrice(coinId: string) {
 
   // Get current price data from multiple sources
   const [geckoCurrentData, binanceTickerData] = await Promise.all([
-    axios.get(`${COINGECKO_API}/simple/price`, {
+    api(`${COINGECKO_API}/simple/price`, {
       params: {
         ids: coinId,
         vs_currencies: 'usd',
@@ -102,20 +107,6 @@ async function fetchCoinGeckoPrice(coinId: string) {
   const priceChange24h = geckoResponse?.data?.[coinId]?.usd_24h_change || 0;
 
   // Return the most recent price
-  return {
-    historicalData: {
-      prices: binanceResponse?.data || [],
-      lastUpdated: new Date().toISOString()
-    },
-    currentData: {
-      [coinId]: {
-        usd: currentPrice,
-        usd_24h_change: geckoResponse.data[coinId]?.usd_24h_change || 0,
-        last_updated_at: Math.floor(Date.now() / 1000)
-      }
-    }
-  };
-
   return {
     historicalData: {
       prices: binanceResponse?.data || [],

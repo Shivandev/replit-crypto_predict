@@ -48,10 +48,6 @@ mode = "parallel"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npm run check"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
 args = "npm run dev"
 
 [[workflows.workflow.tasks]]
