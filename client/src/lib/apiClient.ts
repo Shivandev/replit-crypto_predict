@@ -92,12 +92,14 @@ async function fetchCoinGeckoPrice(coinId: string) {
     }).catch(() => null)
   ]);
 
-  // Aggregate prices from multiple sources for accuracy
-  const binanceCurrentPrice = parseFloat(binancePrice?.data?.price);
-  const geckoCurrentPrice = geckoResponse.data[coinId]?.usd;
+  // Calculate median price from available sources
+  const validPrices = Object.values(prices).filter(price => price && !isNaN(price));
+  const currentPrice = validPrices.length > 0 
+    ? validPrices.sort((a, b) => a - b)[Math.floor(validPrices.length / 2)]
+    : null;
 
-  // Prioritize Binance price as it's more real-time
-  const currentPrice = binanceCurrentPrice || geckoCurrentPrice;
+  // Get 24h change from CoinGecko
+  const priceChange24h = geckoResponse?.data?.[coinId]?.usd_24h_change || 0;
 
   // Return the most recent price
   return {
