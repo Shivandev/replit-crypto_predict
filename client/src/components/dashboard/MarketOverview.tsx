@@ -15,20 +15,35 @@ export default function MarketOverview() {
   const [selectedTimeframe, setSelectedTimeframe] = useState("1d");
   const [selectedCrypto, setSelectedCrypto] = useState<string>("BTC");
 
-  // Fetch market stats
-  const { data: marketStats, isLoading: isLoadingStats } = useQuery<MarketStats>({
+  // Fetch market stats with error handling
+  const { data: marketStats, isLoading: isLoadingStats, error: marketStatsError } = useQuery<MarketStats>({
     queryKey: ["/api/market-stats"],
+    onError: (error) => {
+      console.error("Error fetching market stats", error);
+    },
   });
 
-  // Fetch cryptocurrencies
-  const { data: cryptocurrencies, isLoading: isLoadingCryptos } = useQuery<Cryptocurrency[]>({
+  // Fetch cryptocurrencies with error handling
+  const { data: cryptocurrencies, isLoading: isLoadingCryptos, error: cryptosError } = useQuery<Cryptocurrency[]>({
     queryKey: ["/api/cryptocurrencies"],
     refetchInterval: 10000, // Refetch every 10 seconds
     staleTime: 5000, // Consider data stale after 5 seconds
+    onError: (error) => {
+      console.error("Error fetching cryptocurrencies", error);
+    },
   });
 
   // Get the selected cryptocurrency
   const selectedCryptocurrency = cryptocurrencies?.find(crypto => crypto.symbol === selectedCrypto);
+
+  // Handle timeframe change
+  const handleTimeframeChange = (value: string) => {
+    if (timeframeOptions.some(option => option.value === value)) {
+      setSelectedTimeframe(value);
+    } else {
+      console.error("Invalid timeframe selected");
+    }
+  };
 
   return (
     <section className="mb-8">
@@ -37,13 +52,14 @@ export default function MarketOverview() {
         <div className="flex space-x-2">
           {timeframeOptions.map(option => (
             <button
+              aria-pressed={selectedTimeframe === option.value ? "true" : "false"}
               key={option.value}
               className={`${
                 selectedTimeframe === option.value
                   ? "bg-primary text-white"
                   : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
               } px-3 py-1 rounded-md text-sm font-medium`}
-              onClick={() => setSelectedTimeframe(option.value)}
+              onClick={() => handleTimeframeChange(option.value)}
             >
               {option.label}
             </button>
@@ -57,9 +73,9 @@ export default function MarketOverview() {
           // Loading skeleton
           Array(4).fill(0).map((_, index) => (
             <div key={index} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 animate-pulse">
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-2"></div>
-              <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-2"></div>
-              <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-full mt-2"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+              <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-2"></div>
+              <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mt-2"></div>
             </div>
           ))
         ) : marketStats ? (
@@ -95,7 +111,7 @@ export default function MarketOverview() {
             />
           </>
         ) : (
-          <div className="col-span-4 text-center py-4">Failed to load market stats</div>
+          <div className="col-span-4 text-center py-4 text-red-500">Failed to load market stats</div>
         )}
       </div>
 
@@ -105,6 +121,7 @@ export default function MarketOverview() {
           <div className="flex items-center space-x-4">
             <div>
               <select
+                aria-label="Select cryptocurrency"
                 className="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2"
                 value={selectedCrypto}
                 onChange={(e) => setSelectedCrypto(e.target.value)}
@@ -156,10 +173,12 @@ export default function MarketOverview() {
         </div>
 
         {/* Price Chart */}
-        <PriceChart 
-          cryptocurrency={selectedCryptocurrency} 
-          timeframe={selectedTimeframe} 
-        />
+        {selectedCryptocurrency && (
+          <PriceChart 
+            cryptocurrency={selectedCryptocurrency} 
+            timeframe={selectedTimeframe} 
+          />
+        )}
       </div>
     </section>
   );
