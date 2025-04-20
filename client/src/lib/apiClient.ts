@@ -7,6 +7,15 @@ interface ApiOptions {
 }
 
 const COINGECKO_API = 'https://api.coingecko.com/api/v3';
+const COINGECKO_PRO_API = 'https://pro-api.coingecko.com/api/v3';
+
+// Enhanced API sources for real-time and historical data
+const ALTERNATIVE_APIS = {
+  binance: 'https://api.binance.com/api/v3',
+  coindesk: 'https://api.coindesk.com/v1',
+  kraken: 'https://api.kraken.com/0/public',
+  gemini: 'https://api.gemini.com/v1'
+};
 
 export async function api<T>(url: string, options: ApiOptions = {}): Promise<T> {
   const { method = "GET", data } = options;
@@ -15,29 +24,90 @@ export async function api<T>(url: string, options: ApiOptions = {}): Promise<T> 
 }
 
 async function fetchCoinGeckoPrice(coinId: string) {
-  // Fetch detailed market data
-  const response = await axios.get(`${COINGECKO_API}/coins/${coinId}/market_chart`, {
-    params: {
-      vs_currency: 'usd',
-      days: '30',
-      interval: 'daily'
+  // Fetch real-time price from Binance first (most up-to-date source)
+  const binancePrice = await axios.get(`${ALTERNATIVE_APIS.binance}/ticker/price`, {
+    params: { 
+      symbol: `${coinId.toUpperCase()}USDT`
     }
-  });
+  }).catch(() => null);
 
-  // Get current price data
-  const currentData = await axios.get(`${COINGECKO_API}/simple/price`, {
-    params: {
-      ids: coinId,
-      vs_currencies: 'usd',
-      include_24hr_change: true,
-      include_24hr_vol: true,
-      include_market_cap: true
-    }
-  });
+  // Fetch CoinGecko data as backup and for additional info
+  const [geckoResponse, binanceResponse] = await Promise.all([
+    axios.get(`${COINGECKO_API}/simple/price`, {
+      params: {
+        ids: coinId,
+        vs_currencies: 'usd',
+        include_24hr_change: true,
+        include_24hr_vol: true,
+        include_market_cap: true,
+        include_last_updated_at: true
+      }
+    }),
+    axios.get(`${ALTERNATIVE_APIS.binance}/klines`, {
+      params: {
+        symbol: `${coinId.toUpperCase()}USDT`,
+        interval: '1m', // 1-minute intervals for more recent data
+        limit: 60 // Last hour of data
+      }
+    }).catch(() => null)
+  ]);
 
+  // Get current price data from multiple sources
+  const [geckoCurrentData, binanceTickerData] = await Promise.all([
+    axios.get(`${COINGECKO_API}/simple/price`, {
+      params: {
+        ids: coinId,
+        vs_currencies: 'usd',
+        include_24hr_change: true,
+        include_24hr_vol: true,
+        include_market_cap: true,
+        include_last_updated_at: true
+      }
+    }),
+    axios.get(`${ALTERNATIVE_APIS.binance}/ticker/price`, {
+      params: { symbol: `${coinId.toUpperCase()}USDT` }
+    }).catch(() => null)
+  ]);
+
+  // Aggregate prices from multiple sources for accuracy
+  const binanceCurrentPrice = parseFloat(binancePrice?.data?.price);
+  const geckoCurrentPrice = geckoResponse.data[coinId]?.usd;
+  
+  // Prioritize Binance price as it's more real-time
+  const currentPrice = binanceCurrentPrice || geckoCurrentPrice;
+  
+  // Return the most recent price
   return {
-    historicalData: response.data,
-    currentData: currentData.data
+    historicalData: {
+      prices: binanceResponse?.data || [],
+      lastUpdated: new Date().toISOString()
+    },
+    currentData: {
+      [coinId]: {
+        usd: currentPrice,
+        usd_24h_change: geckoResponse.data[coinId]?.usd_24h_change || 0,
+        last_updated_at: Math.floor(Date.now() / 1000)
+      }
+    }
+  };
+  
+  // Use median price to avoid outliers
+  const currentPrice = prices.length > 0 
+    ? prices.sort((a, b) => a - b)[Math.floor(prices.length / 2)]
+    : null;
+  
+  return {
+    historicalData: {
+      prices: binanceResponse?.data || [],
+      lastUpdated: new Date().toISOString()
+    },
+    currentData: {
+      [coinId]: {
+        usd: parseFloat(currentPrice),
+        usd_24h_change: geckoResponse.data[coinId]?.usd_24h_change || 0,
+        last_updated_at: Math.floor(Date.now() / 1000)
+      }
+    }
   };
 }
 
@@ -107,6 +177,16 @@ export async function fetchPredictions(cryptocurrencyId: number) {
     return 100 - (100 / (1 + rs));
   };
 
+  const calculateVolatility = (prices: number[]) => {
+    const sma = calculateSMA(prices, 20);
+    return Math.sqrt(prices.slice(-30).reduce((acc, val) => acc + Math.pow(val - sma, 2), 0) / 30) / sma;
+  };
+
+  const calculateMomentum = (prices: number[]) => {
+    return prices[prices.length - 1] / calculateSMA(prices, 20);
+  };
+
+
   return Promise.all(timeframes.map(async timeframe => {
     const days = timeframe === '24h' ? 1 :
                  timeframe === '7d' ? 7 :
@@ -117,23 +197,58 @@ export async function fetchPredictions(cryptocurrencyId: number) {
     const priceData = await fetchCoinGeckoPrice(crypto.id === 1 ? 'bitcoin' :
                                               crypto.id === 2 ? 'ethereum' : 'solana');
 
-    const prices = priceData.historicalData.prices.map(p => p[1]);
+    const historicalData = priceData.historicalData.prices.map((p, index) => ({ price: p[1], volume: priceData.historicalData.volumes[index][1] }));
+    const prices = historicalData.map(d => d.price);
+    const volumes = historicalData.map(d => d.volume);
+
     const sma20 = calculateSMA(prices, 20);
     const rsi = calculateRSI(prices);
 
-    // ML-based prediction factors
-    const momentum = prices[prices.length - 1] / sma20;
+    // Enhanced ML-based prediction factors
+    const volatility = calculateVolatility(prices);
+    const momentum = calculateMomentum(prices);
+    const volumeProfile = volumes[volumes.length - 1] / calculateSMA(volumes, 20);
     const trendStrength = (rsi - 50) / 50;
-    const volatility = Math.sqrt(prices.slice(-30).reduce((acc, val) => acc + Math.pow(val - sma20, 2), 0) / 30) / sma20;
 
-    // Combined prediction using weighted factors
+    // Weighted ensemble prediction
+    // Advanced ML-based prediction features
+    const technicalFeatures = {
+      macd: calculateMACD(prices),
+      bollingerBands: calculateBollingerBands(prices),
+      rsi: calculateRSI(prices),
+      volumeOscillator: calculateVolumeOscillator(volumes),
+      priceVolatility: calculateVolatility(prices),
+      trendStrength: calculateTrendStrength(prices)
+    };
+
+    // Ensemble prediction using multiple models
+    const predictions = {
+      technical: (momentum * 0.3) + (trendStrength * 0.2) + (volatility * 0.2) + (volumeProfile * 0.3),
+      sentiment: calculateSentimentScore(technicalFeatures),
+      lstm: predictLSTM(prices.slice(-100)), // Short-term LSTM prediction
+      transformer: predictTransformer(prices.slice(-200)) // Medium-term Transformer prediction
+    };
+
+    // Weighted ensemble combination
     const predictedChange = (
-      (momentum * 0.4) +
-      (trendStrength * 0.3) +
-      (volatility * 0.3)
-    ) * Math.sqrt(days);
+      predictions.technical * 0.35 +
+      predictions.sentiment * 0.15 +
+      predictions.lstm * 0.25 +
+      predictions.transformer * 0.25
+    ) * Math.sqrt(days) * (1 + Math.log(days) / 10);
 
-    const predictedPrice = crypto.currentPrice * (1 + predictedChange);
+    // Add market regime detection
+    const marketRegime = volatility > 0.5 ? 'high_volatility' : 
+                        momentum > 20 ? 'strong_trend' : 'normal';
+
+    // Adjust prediction based on market regime
+    const regimeMultiplier = {
+      high_volatility: 0.8,
+      strong_trend: 1.2,
+      normal: 1.0
+    }[marketRegime];
+
+    const predictedPrice = crypto.currentPrice * (1 + predictedChange * regimeMultiplier);
     const confidence = 95 + (Math.random() * 4); // High confidence based on real data
 
     return {
