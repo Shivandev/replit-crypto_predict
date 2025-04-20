@@ -65,7 +65,7 @@ class DatabaseStorage implements IStorage {
   }
 
   async getAllCryptocurrencies(): Promise<Cryptocurrency[]> {
-    return db.select().from(cryptocurrencies);
+    return db.select().from(cryptocurrencies).orderBy(sql`${cryptocurrencies.updatedAt} DESC`);
   }
 
   async createCryptocurrency(crypto: InsertCryptocurrency): Promise<Cryptocurrency> {
