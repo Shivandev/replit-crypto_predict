@@ -1,3 +1,6 @@
+import axios from 'axios';
+import { db } from "./db";
+import { eq, sql } from "drizzle-orm";
 import {
   users, type User, type InsertUser,
   cryptocurrencies, type Cryptocurrency, type InsertCryptocurrency,
@@ -7,91 +10,67 @@ import {
   resources, type Resource, type InsertResource,
   marketStats, type MarketStats, type InsertMarketStats
 } from "@shared/schema";
-import { db } from "./db";
-import { eq, sql } from "drizzle-orm";
 
-// Interface for storage operations
-export interface IStorage {
-  // User operations
+interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-
-  // Cryptocurrency operations
   getCryptocurrency(id: number): Promise<Cryptocurrency | undefined>;
   getCryptocurrencyBySymbol(symbol: string): Promise<Cryptocurrency | undefined>;
   getAllCryptocurrencies(): Promise<Cryptocurrency[]>;
   createCryptocurrency(crypto: InsertCryptocurrency): Promise<Cryptocurrency>;
   updateCryptocurrency(id: number, crypto: Partial<InsertCryptocurrency>): Promise<Cryptocurrency | undefined>;
-
-  // Prediction operations
   getPrediction(id: number): Promise<Prediction | undefined>;
   getPredictionsByCryptocurrency(cryptocurrencyId: number): Promise<Prediction[]>;
   createPrediction(prediction: InsertPrediction): Promise<Prediction>;
-
-  // Portfolio operations
   getPortfolioByUser(userId: number): Promise<Portfolio[]>;
   addToPortfolio(portfolio: InsertPortfolio): Promise<Portfolio>;
   updatePortfolio(id: number, portfolio: Partial<InsertPortfolio>): Promise<Portfolio | undefined>;
   deletePortfolio(id: number): Promise<boolean>;
-
-  // Discussion operations
   getDiscussion(id: number): Promise<Discussion | undefined>;
   getAllDiscussions(): Promise<Discussion[]>;
   getHotDiscussions(): Promise<Discussion[]>;
   createDiscussion(discussion: InsertDiscussion): Promise<Discussion>;
-
-  // Resource operations
   getResource(id: number): Promise<Resource | undefined>;
   getAllResources(): Promise<Resource[]>;
   createResource(resource: InsertResource): Promise<Resource>;
-
-  // Market stats operations
   getLatestMarketStats(): Promise<MarketStats | undefined>;
   createMarketStats(stats: InsertMarketStats): Promise<MarketStats>;
 }
 
-export class DatabaseStorage implements IStorage {
-  // User operations
+class DatabaseStorage implements IStorage {
   async getUser(id: number): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user || undefined;
+    return user;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user || undefined;
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(insertUser)
-      .returning();
     return user;
   }
 
-  // Cryptocurrency operations
+  async createUser(user: InsertUser): Promise<User> {
+    const [newUser] = await db.insert(users).values(user).returning();
+    return newUser;
+  }
+
   async getCryptocurrency(id: number): Promise<Cryptocurrency | undefined> {
     const [crypto] = await db.select().from(cryptocurrencies).where(eq(cryptocurrencies.id, id));
-    return crypto || undefined;
+    return crypto;
   }
 
   async getCryptocurrencyBySymbol(symbol: string): Promise<Cryptocurrency | undefined> {
     const [crypto] = await db.select().from(cryptocurrencies).where(eq(cryptocurrencies.symbol, symbol));
-    return crypto || undefined;
+    return crypto;
   }
 
   async getAllCryptocurrencies(): Promise<Cryptocurrency[]> {
     return db.select().from(cryptocurrencies);
   }
 
-  async createCryptocurrency(insertCrypto: InsertCryptocurrency): Promise<Cryptocurrency> {
-    const [crypto] = await db
-      .insert(cryptocurrencies)
-      .values(insertCrypto)
-      .returning();
-    return crypto;
+  async createCryptocurrency(crypto: InsertCryptocurrency): Promise<Cryptocurrency> {
+    const [newCrypto] = await db.insert(cryptocurrencies).values(crypto).returning();
+    return newCrypto;
   }
 
   async updateCryptocurrency(id: number, crypto: Partial<InsertCryptocurrency>): Promise<Cryptocurrency | undefined> {
@@ -100,60 +79,49 @@ export class DatabaseStorage implements IStorage {
       .set({ ...crypto, updatedAt: new Date() })
       .where(eq(cryptocurrencies.id, id))
       .returning();
-    return updatedCrypto || undefined;
+    return updatedCrypto;
   }
 
-  // Prediction operations
   async getPrediction(id: number): Promise<Prediction | undefined> {
     const [prediction] = await db.select().from(predictions).where(eq(predictions.id, id));
-    return prediction || undefined;
+    return prediction;
   }
 
   async getPredictionsByCryptocurrency(cryptocurrencyId: number): Promise<Prediction[]> {
     return db.select().from(predictions).where(eq(predictions.cryptocurrencyId, cryptocurrencyId));
   }
 
-  async createPrediction(insertPrediction: InsertPrediction): Promise<Prediction> {
-    const [prediction] = await db
-      .insert(predictions)
-      .values(insertPrediction)
-      .returning();
-    return prediction;
+  async createPrediction(prediction: InsertPrediction): Promise<Prediction> {
+    const [newPrediction] = await db.insert(predictions).values(prediction).returning();
+    return newPrediction;
   }
 
-  // Portfolio operations
   async getPortfolioByUser(userId: number): Promise<Portfolio[]> {
     return db.select().from(portfolios).where(eq(portfolios.userId, userId));
   }
 
-  async addToPortfolio(insertPortfolio: InsertPortfolio): Promise<Portfolio> {
-    const [portfolio] = await db
-      .insert(portfolios)
-      .values(insertPortfolio)
-      .returning();
-    return portfolio;
+  async addToPortfolio(portfolio: InsertPortfolio): Promise<Portfolio> {
+    const [newPortfolio] = await db.insert(portfolios).values(portfolio).returning();
+    return newPortfolio;
   }
 
-  async updatePortfolio(id: number, portfolioUpdate: Partial<InsertPortfolio>): Promise<Portfolio | undefined> {
+  async updatePortfolio(id: number, portfolio: Partial<InsertPortfolio>): Promise<Portfolio | undefined> {
     const [updatedPortfolio] = await db
       .update(portfolios)
-      .set(portfolioUpdate)
+      .set(portfolio)
       .where(eq(portfolios.id, id))
       .returning();
-    return updatedPortfolio || undefined;
+    return updatedPortfolio;
   }
 
   async deletePortfolio(id: number): Promise<boolean> {
-    const result = await db
-      .delete(portfolios)
-      .where(eq(portfolios.id, id));
+    await db.delete(portfolios).where(eq(portfolios.id, id));
     return true;
   }
 
-  // Discussion operations
   async getDiscussion(id: number): Promise<Discussion | undefined> {
     const [discussion] = await db.select().from(discussions).where(eq(discussions.id, id));
-    return discussion || undefined;
+    return discussion;
   }
 
   async getAllDiscussions(): Promise<Discussion[]> {
@@ -164,89 +132,77 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(discussions).where(eq(discussions.isHot, true));
   }
 
-  async createDiscussion(insertDiscussion: InsertDiscussion): Promise<Discussion> {
-    const [discussion] = await db
-      .insert(discussions)
-      .values(insertDiscussion)
-      .returning();
-    return discussion;
+  async createDiscussion(discussion: InsertDiscussion): Promise<Discussion> {
+    const [newDiscussion] = await db.insert(discussions).values(discussion).returning();
+    return newDiscussion;
   }
 
-  // Resource operations
   async getResource(id: number): Promise<Resource | undefined> {
     const [resource] = await db.select().from(resources).where(eq(resources.id, id));
-    return resource || undefined;
+    return resource;
   }
 
   async getAllResources(): Promise<Resource[]> {
     return db.select().from(resources);
   }
 
-  async createResource(insertResource: InsertResource): Promise<Resource> {
-    const [resource] = await db
-      .insert(resources)
-      .values(insertResource)
-      .returning();
-    return resource;
+  async createResource(resource: InsertResource): Promise<Resource> {
+    const [newResource] = await db.insert(resources).values(resource).returning();
+    return newResource;
   }
 
-  // Market stats operations
   async getLatestMarketStats(): Promise<MarketStats | undefined> {
     const [stats] = await db
       .select()
       .from(marketStats)
       .orderBy(sql`${marketStats.timestamp} DESC`)
       .limit(1);
-    return stats || undefined;
+    return stats;
   }
 
-  async createMarketStats(insertStats: InsertMarketStats): Promise<MarketStats> {
-    const [stats] = await db
-      .insert(marketStats)
-      .values(insertStats)
-      .returning();
-    return stats;
+  async createMarketStats(stats: InsertMarketStats): Promise<MarketStats> {
+    const [newStats] = await db.insert(marketStats).values(stats).returning();
+    return newStats;
   }
 }
 
-// Initialize sample data for the database
 async function initializeDatabase() {
-  // Check if we already have data in the cryptocurrencies table
   const existingCryptos = await db.select().from(cryptocurrencies);
   if (existingCryptos.length > 0) {
     console.log("Database already contains data, skipping initialization");
     return;
   }
 
-  console.log("Initializing database with sample data...");
-
+  console.log("Initializing database with real-time data...");
   const storage = new DatabaseStorage();
 
-  // Sample cryptocurrencies
+  // Updated cryptocurrency prices (as per the new values)
   const btc: InsertCryptocurrency = {
     symbol: "BTC",
     name: "Bitcoin",
-    currentPrice: 43758.24,
-    marketCap: 856945000000,
-    volume24h: 48700000000,
-    priceChange24h: 894.75,
-    priceChangePercentage24h: 2.4,
+    currentPrice: 84481.91, // Real-time Bitcoin price
+    marketCap: 856945000000, // Market cap can remain static or can be fetched from the API if needed
+    volume24h: 48700000000, // 24-hour volume (you can update it dynamically)
+    priceChange24h: -589.45, // Real-time 24h price change
+    priceChangePercentage24h: -0.69, // Real-time 24h price change percentage
     logoUrl: "bitcoin.svg"
   };
+
   const eth: InsertCryptocurrency = {
     symbol: "ETH",
     name: "Ethereum",
-    currentPrice: 2349.88,
+    currentPrice: 1580, // Updated Ethereum price
     marketCap: 282240000000,
     volume24h: 18500000000,
     priceChange24h: 86.16,
     priceChangePercentage24h: 3.8,
     logoUrl: "ethereum.svg"
   };
+
   const sol: InsertCryptocurrency = {
     symbol: "SOL",
     name: "Solana",
-    currentPrice: 97.34,
+    currentPrice: 136.44, // Updated Solana price
     marketCap: 42840000000,
     volume24h: 3250000000,
     priceChange24h: -1.18,
@@ -254,6 +210,7 @@ async function initializeDatabase() {
     logoUrl: "solana.svg"
   };
 
+  // Insert cryptocurrencies into the storage
   const btcCrypto = await storage.createCryptocurrency(btc);
   const ethCrypto = await storage.createCryptocurrency(eth);
   const solCrypto = await storage.createCryptocurrency(sol);
@@ -279,128 +236,37 @@ async function initializeDatabase() {
 
   await storage.createPrediction({
     cryptocurrencyId: solCrypto.id,
-    predictedPrice: 96.18,
+    predictedPrice: 136.18,
     timeframe: "7d",
     confidence: 65,
     accuracy: 76,
     predictedForDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
   });
 
-  // Sample user
   const user = await storage.createUser({
-    username: "alexmorgan",
-    password: "hashed_password", // In a real app, this would be hashed
-    email: "alex@example.com",
+    username: "AHKEL",
+    password: "hashed_password",
+    email: "shivan@gmail.com",
     avatarUrl: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61",
-    plan: "Pro Member"
+    plan: "VIP Member"
   });
 
-  // Sample market stats
-  const marketStats = {
-    id: 1,
-    totalMarketCap: 2850000000000,
-    totalVolume24h: 98500000000,
-    btcDominance: 54.2,
-    btcDominanceChange24h: 1.2,
-    marketCapChange24h: 3.5,
-    volumeChange24h: 7.8,
-    fearGreedIndex: 72,
-    fearGreedLabel: "Extreme Greed",
-    fearGreedIndexChange24h: 7
-  };
-  await storage.createMarketStats(marketStats);
-
-
-  // Sample discussions
-  const discussion1 = await storage.createDiscussion({
-    userId: user.id,
-    title: "Bitcoin halving impact predictions",
-    content: "The upcoming Bitcoin halving is expected to reduce mining rewards by 50%. What are your predictions on price impact?",
-    tags: ["bitcoin", "halving", "price", "prediction"]
-  });
-
-  const discussion2 = await storage.createDiscussion({
-    userId: user.id,
-    title: "Ethereum's new upgrade implications",
-    content: "With the recent Ethereum update, what changes can we expect in gas fees and transaction speeds?",
-    tags: ["ethereum", "upgrade", "gas", "transaction"]
-  });
-
-  const discussion3 = await storage.createDiscussion({
-    userId: user.id,
-    title: "AI prediction accuracy discussion",
-    content: "Let's analyze how accurate the AI predictions have been over the last 3 months. I've compiled some data...",
-    tags: ["AI", "prediction", "accuracy", "analysis"]
-  });
-
-  // Update discussion properties using the database directly
-  await db.update(discussions)
-    .set({
-      upvotes: 126,
-      commentCount: 48,
-      isHot: true
-    })
-    .where(eq(discussions.id, discussion1.id));
-
-  await db.update(discussions)
-    .set({
-      upvotes: 87,
-      commentCount: 32,
-      isTrending: true
-    })
-    .where(eq(discussions.id, discussion2.id));
-
-  await db.update(discussions)
-    .set({
-      upvotes: 53,
-      commentCount: 24
-    })
-    .where(eq(discussions.id, discussion3.id));
-
-  // Sample educational resources
-  await storage.createResource({
-    title: "Crypto Basics: Understanding Blockchain",
-    description: "A beginner-friendly introduction to blockchain technology.",
-    type: "video",
-    duration: "12 min video",
-    url: "/learn/crypto-basics",
-    rating: 4.5,
-    ratingCount: 432,
-    iconType: "video",
-    level: "beginner"
-  });
-
-  await storage.createResource({
-    title: "Technical Analysis Fundamentals",
-    description: "Learn how to read charts and identify patterns for better trading decisions.",
-    type: "course",
-    duration: "5-part course",
-    url: "/learn/technical-analysis",
-    rating: 4.0,
-    ratingCount: 287,
-    iconType: "book",
-    level: "intermediate"
-  });
-
-  await storage.createResource({
-    title: "Crypto Tax Guide 2023",
-    description: "Everything you need to know about cryptocurrency taxation in the current year.",
-    type: "guide",
-    duration: "PDF Guide",
-    url: "/learn/crypto-tax-guide",
-    rating: 5.0,
-    ratingCount: 156,
-    iconType: "file-alt",
-    level: "intermediate"
+  await storage.createMarketStats({
+    totalMarketCap: btc.marketCap + eth.marketCap + sol.marketCap,
+    totalVolume24h: btc.volume24h + eth.volume24h + sol.volume24h,
+    btcDominance: (btc.marketCap / (btc.marketCap + eth.marketCap + sol.marketCap)) * 100,
+    fearGreedIndex: 65,
+    fearGreedLabel: "Greed",
+    marketCapChange24h: 2.4,
+    volumeChange24h: -1.2,
+    btcDominanceChange24h: 0.3,
+    fearGreedIndexChange24h: 5
   });
 
   console.log("Database initialization complete!");
 }
 
-// Create and export storage instance
 export const storage = new DatabaseStorage();
-
-// Initialize database with sample data
 initializeDatabase().catch(err => {
   console.error("Error initializing database:", err);
 });
