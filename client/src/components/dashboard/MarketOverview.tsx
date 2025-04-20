@@ -14,21 +14,22 @@ const timeframeOptions = [
 export default function MarketOverview() {
   const [selectedTimeframe, setSelectedTimeframe] = useState("1d");
   const [selectedCrypto, setSelectedCrypto] = useState<string>("BTC");
-  
+
   // Fetch market stats
   const { data: marketStats, isLoading: isLoadingStats } = useQuery<MarketStats>({
     queryKey: ["/api/market-stats"],
   });
-  
+
   // Fetch cryptocurrencies
   const { data: cryptocurrencies, isLoading: isLoadingCryptos } = useQuery<Cryptocurrency[]>({
     queryKey: ["/api/cryptocurrencies"],
-    refetchInterval: 30000, // Refetch every 30 seconds
+    refetchInterval: 10000, // Refetch every 10 seconds
+    staleTime: 5000, // Consider data stale after 5 seconds
   });
-  
+
   // Get the selected cryptocurrency
   const selectedCryptocurrency = cryptocurrencies?.find(crypto => crypto.symbol === selectedCrypto);
-  
+
   return (
     <section className="mb-8">
       <div className="flex items-center justify-between mb-6">
@@ -49,7 +50,7 @@ export default function MarketOverview() {
           ))}
         </div>
       </div>
-      
+
       {/* Market Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         {isLoadingStats ? (
@@ -97,7 +98,7 @@ export default function MarketOverview() {
           <div className="col-span-4 text-center py-4">Failed to load market stats</div>
         )}
       </div>
-      
+
       {/* Main Chart */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
         <div className="flex justify-between items-center mb-4">
@@ -121,7 +122,7 @@ export default function MarketOverview() {
                 )}
               </select>
             </div>
-            
+
             {selectedCryptocurrency && (
               <div className="flex items-center">
                 <span className="text-2xl font-mono font-bold">
@@ -140,7 +141,7 @@ export default function MarketOverview() {
               </div>
             )}
           </div>
-          
+
           <div className="flex space-x-2">
             <button className="border border-gray-300 dark:border-gray-600 px-3 py-1 rounded-md text-sm hover:bg-gray-50 dark:hover:bg-gray-700">
               Price
@@ -153,7 +154,7 @@ export default function MarketOverview() {
             </button>
           </div>
         </div>
-        
+
         {/* Price Chart */}
         <PriceChart 
           cryptocurrency={selectedCryptocurrency} 
