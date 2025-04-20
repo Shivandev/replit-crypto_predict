@@ -38,7 +38,7 @@ async function fetchCoinGeckoPrice(coinId: string) {
   ]);
 
   // Get median price from all valid responses
-  const validPrices = prices
+  const filteredPrices = prices
     .filter(response => response && response.data)
     .map(response => {
       const data = response.data;

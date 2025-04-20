@@ -121,7 +121,7 @@ export default function AIPredictionsPage() {
                 cryptocurrency={selectedCryptocurrency.name}
                 symbol={selectedCryptocurrency.symbol}
                 iconType={selectedCryptocurrency.symbol.toLowerCase()}
-                currentPrice={selectedCryptocurrency.currentPrice}
+                currentPrice={selectedCryptocurrency.currentPrice ?? 0}
                 priceChangePercentage={selectedCryptocurrency.priceChangePercentage24h}
                 predictedPrice={selectedPrediction.predictedPrice}
                 timeframe={selectedPrediction.timeframe}

@@ -86,9 +86,9 @@ export default function MarketOverview() {
             />
             <MarketStatsCard
               title="Fear & Greed Index"
-              value={marketStats.fearGreedIndex}
-              label={marketStats.fearGreedLabel}
-              change={marketStats.fearGreedIndexChange24h}
+              value={marketStats.fearGreedIndex ?? 0}
+              label={marketStats.fearGreedLabel ?? ''}
+              change={marketStats.fearGreedIndexChange24h ?? 0}
               format="index"
               chartColor="gradient"
             />
