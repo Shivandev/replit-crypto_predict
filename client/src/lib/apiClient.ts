@@ -9,12 +9,15 @@ interface ApiOptions {
 const COINGECKO_API = 'https://api.coingecko.com/api/v3';
 const COINGECKO_PRO_API = 'https://pro-api.coingecko.com/api/v3';
 
-// Enhanced API sources for real-time and historical data
+// Enhanced API sources for real-time data
 const ALTERNATIVE_APIS = {
   binance: 'https://api.binance.com/api/v3',
-  coindesk: 'https://api.coindesk.com/v1',
+  coinbase: 'https://api.coinbase.com/v2',
   kraken: 'https://api.kraken.com/0/public',
-  gemini: 'https://api.gemini.com/v1'
+  huobi: 'https://api.huobi.pro/market',
+  bybit: 'https://api.bybit.com/v2/public',
+  kucoin: 'https://api.kucoin.com/api/v1',
+  okx: 'https://www.okx.com/api/v5/market'
 };
 
 export async function api<T>(url: string, options: ApiOptions = {}): Promise<T> {
@@ -24,14 +27,34 @@ export async function api<T>(url: string, options: ApiOptions = {}): Promise<T> 
 }
 
 async function fetchCoinGeckoPrice(coinId: string) {
-  // Fetch real-time price from Binance first (most up-to-date source)
-  const binancePrice = await axios.get(`${ALTERNATIVE_APIS.binance}/ticker/price`, {
-    params: { 
-      symbol: `${coinId.toUpperCase()}USDT`
-    }
-  }).catch(() => null);
+  // Fetch real-time prices from multiple exchanges
+  const prices = await Promise.all([
+    axios.get(`${ALTERNATIVE_APIS.binance}/ticker/price?symbol=${coinId.toUpperCase()}USDT`).catch(() => null),
+    axios.get(`${ALTERNATIVE_APIS.coinbase}/prices/${coinId.toUpperCase()}-USD/spot`).catch(() => null),
+    axios.get(`${ALTERNATIVE_APIS.kraken}/Ticker?pair=${coinId.toUpperCase()}USD`).catch(() => null),
+    axios.get(`${ALTERNATIVE_APIS.huobi}/detail/merged?symbol=${coinId.toLowerCase()}usdt`).catch(() => null),
+    axios.get(`${ALTERNATIVE_APIS.bybit}/tickers?symbol=${coinId.toUpperCase()}USD`).catch(() => null),
+    axios.get(`${ALTERNATIVE_APIS.kucoin}/prices?currencies=${coinId.toUpperCase()}`).catch(() => null)
+  ]);
 
-  // Fetch CoinGecko data as backup and for additional info
+  // Get median price from all valid responses
+  const validPrices = prices
+    .filter(response => response && response.data)
+    .map(response => {
+      const data = response.data;
+      if (data.price) return parseFloat(data.price);
+      if (data.data?.price) return parseFloat(data.data.price);
+      if (data.data?.amount) return parseFloat(data.data.amount);
+      if (data.tick?.close) return parseFloat(data.tick.close);
+      if (data.result?.[0]?.price) return parseFloat(data.result[0].price);
+      return null;
+    })
+    .filter(price => price !== null)
+    .sort((a, b) => a - b);
+
+  const medianPrice = validPrices[Math.floor(validPrices.length / 2)] || null;
+
+  // Fetch CoinGecko data for additional info
   const [geckoResponse, binanceResponse] = await Promise.all([
     axios.get(`${COINGECKO_API}/simple/price`, {
       params: {
