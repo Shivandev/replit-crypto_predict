@@ -91,11 +91,6 @@ async function fetchCoinGeckoPrice(coinId: string) {
     }
   };
   
-  // Use median price to avoid outliers
-  const currentPrice = prices.length > 0 
-    ? prices.sort((a, b) => a - b)[Math.floor(prices.length / 2)]
-    : null;
-  
   return {
     historicalData: {
       prices: binanceResponse?.data || [],
@@ -103,7 +98,7 @@ async function fetchCoinGeckoPrice(coinId: string) {
     },
     currentData: {
       [coinId]: {
-        usd: parseFloat(currentPrice),
+        usd: currentPrice,
         usd_24h_change: geckoResponse.data[coinId]?.usd_24h_change || 0,
         last_updated_at: Math.floor(Date.now() / 1000)
       }
